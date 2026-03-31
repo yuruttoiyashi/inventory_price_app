@@ -637,6 +637,7 @@ def generate_ai_market_advice(product_row: dict) -> tuple[str, str]:
 現在価格を維持すべきか、値下げすべきか、値下げするならどんな考え方で調整するかを、初心者にも分かるように具体的に説明する。
 
 必ずJSONだけで返してください。
+説明文や前置きやコードブロックは不要です。
 形式:
 {{
   "market_summary": "...",
@@ -674,18 +675,39 @@ def generate_ai_market_advice(product_row: dict) -> tuple[str, str]:
         if not text:
             return "", "AIコメントの生成に失敗しました。"
 
+        # -------------------------------------------------
+        # コードブロック除去
+        # -------------------------------------------------
+        cleaned = text.strip()
+
+        if cleaned.startswith("```json"):
+            cleaned = cleaned[7:].strip()
+        elif cleaned.startswith("```"):
+            cleaned = cleaned[3:].strip()
+
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3].strip()
+
+        # JSON本体だけ切り出し
+        start = cleaned.find("{")
+        end = cleaned.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            cleaned = cleaned[start:end + 1]
+
         import json
         try:
-            data = json.loads(text)
+            data = json.loads(cleaned)
             market_summary = str(data.get("market_summary", "")).strip()
             ai_advice = str(data.get("ai_advice", "")).strip()
+
             return market_summary, ai_advice
+
         except Exception:
-            return "", text
+            # JSONとして読めなかったら、そのままアドバイス欄に逃がす
+            return "", cleaned
 
     except Exception as e:
         return "", f"AIコメント生成エラー: {e}"
-
 
 # =========================================================
 # CSV
