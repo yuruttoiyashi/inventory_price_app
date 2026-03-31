@@ -1412,7 +1412,7 @@ def price_review_page(df: pd.DataFrame):
     section_title("価格調整アクション")
     c_btn1, c_btn2 = st.columns(2)
 
-    if c_btn1.button("AIに市場調査風アドバイスを作らせる", use_container_width=True):
+    if c_btn1.button("AIに市場調査アドバイスを作らせる", use_container_width=True):
         market_summary, ai_advice = generate_ai_market_advice(selected_row.to_dict())
         st.session_state.ai_market_summary = market_summary
         st.session_state.ai_advice_text = ai_advice
